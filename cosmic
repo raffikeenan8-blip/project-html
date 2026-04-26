@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Stars Wallpaper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="cosmicCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('cosmicCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size ke 4K resolution (scaled to viewport)
+        function resizeCanvas() {
+            canvas.width = window.innerWidth * window.devicePixelRatio;
+            canvas.height = window.innerHeight * window.devicePixelRatio;
+            canvas.style.width = window.innerWidth + 'px';
+            canvas.style.height = window.innerHeight + 'px';
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Animation timing
+        let time = 0;
+
+        // Multiple star layers untuk depth effect
+        const starLayers = [
+            { count: 80, speed: 0.3, size: 1.5, layer: 0 },
+            { count: 120, speed: 0.8, size: 1.0, layer: 1 },
+            { count: 200, speed: 1.5, size: 0.7, layer: 2 },
+            { count: 150, speed: 2.2, size: 0.5, layer: 3 }
+        ];
+
+        const stars = [];
+        
+        // Initialize stars dengan multiple layers
+        class Star {
+            constructor(layerData) {
+                this.x = Math.random() * canvas.width / window.devicePixelRatio;
+                this.y = Math.random() * canvas.height / window.devicePixelRatio;
+                this.size = layerData.size * (Math.random() * 0.8 + 0.5);
+                this.speed = layerData.speed * (Math.random() * 0.4 + 0.6);
+                this.twinkle = Math.random() * Math.PI * 2;
+                this.maxSize = this.size * 2.5;
+                this.layer = layerData.layer;
+                this.brightness = Math.random() * 0.5 + 0.5;
+            }
+
+            update() {
+                this.y += this.speed;
+                if (this.y > canvas.height / window.devicePixelRatio) {
+                    this.y = -this.size * 10;
+                    this.x = Math.random() * canvas.width / window.devicePixelRatio;
+                }
+                this.twinkle += 0.1 + this.layer * 0.05;
+            }
+
+            draw() {
+                const twinkleSize = Math.sin(this.twinkle) * 0.4 + 0.6;
+                const alpha = this.brightness * twinkleSize * (1 - this.layer * 0.2);
+                
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = '#ffffff';
+                
+                // Star shape dengan glow effect
+                ctx.shadowBlur = this.size * 3 + this.layer * 2;
+                ctx.shadowColor = '#ffffff';
+                
+                ctx.translate(this.x, this.y);
+                ctx.rotate(time * 0.0005 + this.layer * 0.001);
+                
+                // Draw star (5-pointed dengan inner glow)
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+                    const outerRadius = this.size * twinkleSize;
+                    const innerRadius = this.size * 0.4 * twinkleSize;
+                    const x = Math.cos(angle) * ((i % 2 === 0) ? outerRadius : innerRadius);
+                    const y = Math.sin(angle) * ((i % 2 === 0) ? outerRadius : innerRadius);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                
+                // Inner core untuk extra shine
+                ctx.shadowBlur = this.size * 1.5;
+                ctx.beginPath();
+                ctx.arc(0, 0, this.size * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        // Initialize all star layers
+        starLayers.forEach(layer => {
+            for (let i = 0; i < layer.count; i++) {
+                stars.push(new Star(layer));
+            }
+        });
+
+        // Cosmic nebula effect (subtle clouds)
+        const nebulaParticles = [];
+        class NebulaParticle {
+            constructor() {
+                this.x = Math.random() * canvas.width / window.devicePixelRatio;
+                this.y = Math.random() * canvas.height / window.devicePixelRatio;
+                this.vx = (Math.random() - 0.5) * 0.2;
+                this.vy = (Math.random() - 0.5) * 0.2;
+                this.size = Math.random() * 80 + 40;
+                this.alpha = Math.random() * 0.03 + 0.01;
+                this.rotation = Math.random() * Math.PI * 2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.rotation += 0.001;
+                
+                if (this.x < 0 || this.x > canvas.width / window.devicePixelRatio) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height / window.devicePixelRatio) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 50;
+                ctx.shadowColor = '#ffffff';
+                
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                // Irregular nebula shape
+                ctx.beginPath();
+                ctx.ellipse(0, 0, this.size * 0.6, this.size * 0.4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        // Initialize nebula
+        for (let i = 0; i < 8; i++) {
+            nebulaParticles.push(new NebulaParticle());
+        }
+
+        // Main animation loop
+        function animate() {
+            // Clear dengan cosmic fade (mulus)
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            ctx.fillRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
+
+            // Draw nebula background (layer paling belakang)
+            nebulaParticles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            // Update & draw stars (multiple layers)
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+
+            // Subtle cosmic drift effect
+            ctx.save();
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 100;
+            ctx.shadowColor = '#ffffff';
+            
+            // Floating cosmic dust
+            for (let i = 0; i < 3; i++) {
+                const x = (time * 0.5 + i * 1000) % (canvas.width / window.devicePixelRatio);
+                const y = canvas.height / window.devicePixelRatio * 0.3 + Math.sin(time * 0.001 + i) * 100;
+                ctx.beginPath();
+                ctx.arc(x, y, 2 + Math.sin(time * 0.01 + i) * 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+
+            time++;
+            requestAnimationFrame(animate);
+        }
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
