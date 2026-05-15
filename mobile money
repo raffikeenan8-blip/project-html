@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WealthGuard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 12px;
+            overflow-x: hidden;
+            touch-action: manipulation;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 100%;
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+            border-radius: 18px;
+            padding: 20px 16px;
+            color: white;
+            box-shadow: 0 12px 30px rgba(74, 144, 226, 0.4);
+            text-align: center;
+        }
+
+        .sidebar h1 {
+            font-size: 1.4em; /* 20px */
+            margin-bottom: 8px;
+            font-weight: 700;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 2em; /* 28px */
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .main-content {
+            flex: 1;
+            background: white;
+            border-radius: 18px;
+            padding: 20px 16px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .title {
+            font-size: 1.4em; /* 20px */
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .calculator-section {
+            background: #f8f9ff;
+            border-radius: 14px;
+            padding: 20px 16px;
+            margin-bottom: 16px;
+            border: 2px solid #e3f2fd;
+        }
+
+        .calc-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .calc-input {
+            width: 100%;
+            padding: 16px 12px;
+            font-size: 1.3em; /* 18px */
+            border: 2px solid #e0e6ed;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            background: white;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .calc-input:focus {
+            outline: none;
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .calc-input.readonly {
+            background: #f0f4ff;
+            color: #4A90E2;
+            font-weight: 700;
+        }
+
+        .calc-input.positive {
+            border-color: #4CAF50;
+            background: #f0fff4;
+            color: #2E7D32;
+        }
+
+        .calc-input.negative {
+            border-color: #FF6B6B;
+            background: #fff5f5;
+            color: #D32F2F;
+        }
+
+        .calc-input.max-limit {
+            border-color: #FF6B6B !important;
+            background: #fff5f5;
+        }
+
+        .calc-label {
+            text-align: center;
+            font-size: 0.95em; /* 13px */
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .limit-info {
+            font-size: 0.8em; /* 11px */
+            color: #888;
+            text-align: center;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        .expenses-section {
+            background: white;
+            border-radius: 14px;
+            padding: 20px 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+
+        .expenses-title {
+            font-size: 1.25em; /* 18px */
+            color: #333;
+            margin-bottom: 16px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .expense-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            border-left: 4px solid #4A90E2;
+        }
+
+        .expense-label {
+            font-weight: 600;
+            color: #444;
+            font-size: 1em; /* 14px */
+        }
+
+        .expense-input {
+            width: 100%;
+            padding: 14px 12px;
+            font-size: 1.2em; /* 17px */
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            text-align: right;
+            background: white;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .expense-input:focus {
+            outline: none;
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+        }
+
+        .expense-input.max-limit {
+            border-color: #FF6B6B !important;
+            background: #fff5f5;
+        }
+
+        /* Total Sections */
+        .total-section, .balance-section {
+            margin-top: 16px;
+            border-radius: 16px;
+            padding: 20px 16px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .total-section {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+        }
+
+        .balance-section {
+            background: linear-gradient(135deg, #4CAF50, #81C784);
+        }
+
+        .total-label, .balance-label {
+            font-size: 1.1em; /* 15px */
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .total-controls {
+            width: 100%;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .total-display, .balance-display {
+            flex: 1;
+            font-size: 1.5em; /* 21px */
+            font-weight: 700;
+            background: rgba(255,255,255,0.25);
+            padding: 16px 12px;
+            border-radius: 12px;
+            text-align: center;
+            border: none;
+            color: white;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .calc-button {
+            width: 60px;
+            height: 60px;
+            background: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.6em; /* 22px */
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.4);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+
+        .calc-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.6);
+        }
+
+        .expenses-section::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .expenses-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 8px;
+        }
+
+        .expenses-section::-webkit-scrollbar-thumb {
+            background: #4A90E2;
+            border-radius: 8px;
+        }
+
+        @supports(padding: max(0px)) {
+            body {
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-top: env(safe-area-inset-top);
+            }
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            .container { flex-direction: row; }
+            .sidebar { width: 180px; height: auto; padding: 16px; }
+            .sidebar h1 { font-size: 1.2em; }
+            .main-content { padding: 16px; }
+            .calc-row { flex-direction: row; gap: 8px; }
+            .calc-input { font-size: 1.1em; padding: 12px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">💎</div>
+            <h1>Wealth<br>Guard</h1>
+            <div style="font-size: 0.8em; opacity: 0.9;">atur keungan anda disni
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h1 class="title">Kelola Keuangan</h1>
+            
+            <!-- Calculator Section -->
+            <div class="calculator-section">
+                <div class="calc-row">
+                    <div>
+                        <div class="calc-label">💹 Pemasukan</div>
+                        <input type="text" class="calc-input" id="income" placeholder="Rp 0" maxlength="20" inputmode="numeric">
+                        <div class="limit-info">Maks 20 digit</div>
+                    </div>
+                    <div>
+                        <div class="calc-label">📉 Pengeluaran</div>
+                        <input type="text" class="calc-input readonly" id="totalExpense" placeholder="Rp 0" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses Section -->
+            <div class="expenses-section">
+                <h2 class="expenses-title">Detail Pengeluaran</h2>
+                
+                <div class="expense-row">
+                    <span class="expense-label">✨ Gaya Hidup</span>
+                    <input type="text" class="expense-input" id="lifestyle" placeholder="Rp 0" maxlength="20" inputmode="numeric">
+                </div>
+                
+                <div class="expense-row">
+                    <span class="expense-label">🚗 Transport</span>
+                    <input type="text" class="expense-input" id="transport" placeholder="Rp 0" maxlength="20" inputmode="numeric">
+                </div>
+                
+                <div class="expense-row">
+                    <span class="expense-label">🥛 Kebutuhan</span>
+                    <input type="text" class="expense-input" id="needs" placeholder="Rp 0" maxlength="20" inputmode="numeric">
+                </div>
+                
+                <div class="expense-row">
+                    <span class="expense-label">📦 Lainnya</span>
+                    <input type="text" class="expense-input" id="others" placeholder="Rp 0" maxlength="20" inputmode="numeric">
+                </div>
+
+                <!-- Total Pengeluaran -->
+                <div class="total-section">
+                    <div class="total-label">💰 Total Pengeluaran</div>
+                    <div class="total-controls">
+                        <input type="text" class="total-display" id="expenseTotal" placeholder="Rp 0" readonly>
+                        <button class="calc-button" onclick="calculateAll()" title="Hitung">＝</button>
+                    </div>
+                </div>
+
+                <!-- Sisa Pemasukan -->
+                <div class="balance-section">
+                    <div class="balance-label">💵 Sisa Pemasukan</div>
+                    <input type="text" class="balance-display" id="balanceRemaining" placeholder="Rp 0" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MAX_DIGITS = 20;
+        
+        function validateAndFormatNumber(input, element) {
+            let value = input.replace(/[^\d]/g, '');
+            
+            if (value.length > MAX_DIGITS) {
+                value = value.slice(0, MAX_DIGITS);
+                element.classList.add('max-limit');
+                setTimeout(() => element.classList.remove('max-limit'), 1000);
+                if (navigator.vibrate) navigator.vibrate(100);
+            } else {
+                element.classList.remove('max-limit');
+            }
+            
+            if (value) {
+                const num = parseInt(value);
+                return num.toLocaleString('id-ID');
+            }
+            return '';
+        }
+
+        function calculateExpenses() {
+            const inputs = ['lifestyle', 'transport', 'needs', 'others'];
+            let total = 0;
+            
+            inputs.forEach(id => {
+                const value = document.getElementById(id).value.replace(/[^\d]/g, '');
+                const num = parseInt(value) || 0;
+                total += num;
+            });
+            
+            const formattedTotal = total.toLocaleString('id-ID');
+            document.getElementById('expenseTotal').value = formattedTotal;
+            document.getElementById('totalExpense').value = formattedTotal;
+            
+            return total;
+        }
+
+        function calculateAll() {
+            const totalExpense = calculateExpenses();
+            const incomeValue = document.getElementById('income').value.replace(/[^\d]/g, '');
+            const income = parseInt(incomeValue) || 0;
+            
+            const balance = income - totalExpense;
+            const formattedBalance = Math.abs(balance).toLocaleString('id-ID');
+            
+            const balanceElement = document.getElementById('balanceRemaining');
+            balanceElement.value = formattedBalance;
+            
+            if (balance >= 0) {
+                balanceElement.classList.add('positive');
+                balanceElement.classList.remove('negative');
+                balanceElement.value = `+Rp ${formattedBalance}`;
+            } else {
+                balanceElement.classList.add('negative');
+                balanceElement.classList.remove('positive');
+                balanceElement.value = `-Rp ${formattedBalance}`;
+            }
+            
+            document.getElementById('totalExpense').classList.remove('positive', 'negative');
+            
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            const balanceDisplay = document.getElementById('balanceRemaining');
+            balanceDisplay.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                balanceDisplay.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        function setupNumberInput(elementId) {
+            const element = document.getElementById(elementId);
+            
+            element.addEventListener('input', function(e) {
+                e.target.value = validateAndFormatNumber(e.target.value, e.target);
+                if (elementId !== 'income') {
+                    debounceCalc();
+                }
+            });
+            
+            element.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                    e.target.value = validateAndFormatNumber(e.target.value, e.target);
+                    if (elementId !== 'income') {
+                        debounceCalc();
+                    }
+                }, 10);
+            });
+        }
+
+        ['income', 'lifestyle', 'transport', 'needs', 'others'].forEach(setupNumberInput);
+
+        let timeout;
+        function debounceCalc() {
+            clearTimeout(timeout);
+            timeout = setTimeout(calculateAll, 500);
+        }
+
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' || e.key === '=') {
+                e.preventDefault();
+                calculateAll();
+            }
+        });
+
+        document.querySelector('.calc-button').addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.95)';
+        });
+
+        document.querySelector('.calc-button').addEventListener('touchend', function() {
+            this.style.transform = 'scale(1)';
+        });
+
+        window.onload = function() {
+            calculateAll();
+        };
+
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>
